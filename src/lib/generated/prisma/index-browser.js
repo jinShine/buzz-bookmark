@@ -120,9 +120,119 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.BookScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  member: 'member',
+  title: 'title',
+  withdel: 'withdel',
+  ispublic: 'ispublic',
+  remark: 'remark'
+};
+
+exports.Prisma.FollowBookScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  book: 'book',
+  member: 'member'
+};
+
+exports.Prisma.LikesScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  mark: 'mark',
+  member: 'member'
+};
+
+exports.Prisma.MarkScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  book: 'book',
+  title: 'title',
+  link: 'link',
+  image: 'image',
+  maker: 'maker',
+  remark: 'remark'
+};
+
+exports.Prisma.MemberScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  nickname: 'nickname',
+  email: 'email',
+  passwd: 'passwd',
+  isadmin: 'isadmin',
+  image: 'image',
+  emailcheck: 'emailcheck',
+  outdt: 'outdt',
+  descript: 'descript'
+};
+
+exports.Prisma.ReportScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  mark: 'mark',
+  member: 'member'
+};
+
+exports.Prisma.TalkScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  mark: 'mark',
+  member: 'member',
+  msg: 'msg'
+};
+
+exports.Prisma.SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
+exports.Prisma.BookOrderByRelevanceFieldEnum = {
+  title: 'title',
+  remark: 'remark'
+};
+
+exports.Prisma.MarkOrderByRelevanceFieldEnum = {
+  title: 'title',
+  link: 'link',
+  image: 'image',
+  remark: 'remark'
+};
+
+exports.Prisma.MemberOrderByRelevanceFieldEnum = {
+  nickname: 'nickname',
+  email: 'email',
+  passwd: 'passwd',
+  image: 'image',
+  emailcheck: 'emailcheck',
+  outdt: 'outdt',
+  descript: 'descript'
+};
+
+exports.Prisma.TalkOrderByRelevanceFieldEnum = {
+  msg: 'msg'
+};
+
 
 exports.Prisma.ModelName = {
-
+  Book: 'Book',
+  FollowBook: 'FollowBook',
+  Likes: 'Likes',
+  Mark: 'Mark',
+  Member: 'Member',
+  Report: 'Report',
+  Talk: 'Talk'
 };
 
 /**

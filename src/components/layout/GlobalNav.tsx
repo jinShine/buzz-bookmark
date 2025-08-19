@@ -31,7 +31,8 @@ export default async function GlobalNav() {
           </Link>
         )}
 
-        <Link href="/api/auth/signin">
+        {/* <Link href="/api/auth/signin"> */}
+        <Link href="/auth/sign-in">
           <Button variant="link">로그인</Button>
         </Link>
       </div>

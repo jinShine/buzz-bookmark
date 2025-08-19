@@ -13,6 +13,9 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
+// 로그인이 필요하지 않는 애들만 체크
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|images|api/auth|login|regist|$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|images|api/auth|login|regist|auth/password-check|auth/sign-in|auth/sign-up|$).*)",
+  ],
 };
