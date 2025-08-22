@@ -37,11 +37,11 @@ function SignInForm({ onToggle }: { onToggle: () => void }) {
           </Link>
         </div>
 
-        <Button variant={"primary"} type="submit" className="w-full">
+        <Button variant={"primary"} type="submit" size={"lg"} className="w-full">
           로그인
         </Button>
 
-        <Button variant={"outline"} type="submit" className="w-full" onClick={onToggle}>
+        <Button variant={"outline"} type="submit" size={"lg"} className="w-full" onClick={onToggle}>
           회원가입
         </Button>
       </div>

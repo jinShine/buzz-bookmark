@@ -62,11 +62,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   pages: {
-    // signIn: "/login",
+    signIn: "/auth/sign-in",
+    error: "/auth/error",
   },
   trustHost: true,
   jwt: { maxAge: 60 * 30 }, // 30분
   callbacks: {
+    // SNS(signin + signup 같이 진행), credentials(signin만 진행)
     // DB를 읽어서 존재하면 로그인
     // 존재하지 않으면 가입로직(이메일 발송)
     async signIn({ user, account, profile }) {
@@ -74,11 +76,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!user.email) return false;
 
       const { email } = user;
-      let member = await prisma.member.findUnique({ where: { email }, select: { id: true, nickname: true } });
+      const isCredentials = account?.provider === "credentials";
+
+      let member = await prisma.member.findUnique({
+        where: { email },
+      });
+
+      if (member) {
+        if (member.emailcheck === null) {
+          return `/auth/error?error=CheckEmail&email=${email}&emailcheck=${member.emailcheck}`;
+        }
+        if (member.outdt) {
+          return "/auth/error?error=WithdrawMember";
+        }
+      }
 
       if (!member) {
         const newMember = await prisma.member.create({
-          select: { id: true, nickname: true },
           data: {
             nickname: user.name || "guest",
             email,
@@ -91,6 +105,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       // sendEmail
+      // if (member.)
 
       // const userData = await findUserByEmail(email);
       // if (account?.provider === "credentials") {

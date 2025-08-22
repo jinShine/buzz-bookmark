@@ -7,7 +7,7 @@ import { signOutAction } from "../../../actions/sign";
 
 export default function MyPage() {
   const signOut = async () => {
-    await signOutAction();
+    await signOutAction({ redirectTo: "/auth/sign-in" });
   };
 
   return (

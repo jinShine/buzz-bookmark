@@ -1,3 +1,4 @@
+import prisma from "@/lib/db";
 import { AuthError } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
@@ -42,6 +43,10 @@ export async function authenticate(prevState: string | undefined, formData: Form
   }
 }
 
-export const signOutAction = async () => {
-  await signOut();
+export const signOutAction = async ({ redirectTo }: { redirectTo?: string } = {}) => {
+  await signOut({ redirectTo });
+};
+
+export const findMemberByEmail = async (email: string) => {
+  return await prisma.member.findUnique({ where: { email } });
 };
