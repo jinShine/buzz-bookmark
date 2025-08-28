@@ -15,3 +15,5 @@ export const AUTH_KAKAO_SECRET = process.env.AUTH_KAKAO_SECRET || "";
 
 export const MAILER_USER = process.env.GOOGLE_USER || "";
 export const MAILER_PASS = process.env.GOOGLE_PASS || "";
+
+export const INTERNAL_SECRET = process.env.NEXT_PUBLIC_INTERNAL_SECRET || "";

@@ -22,7 +22,7 @@ export const sendSignUpCheck = async (to: string, checkCode: string, subject?: s
     html ||
     `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
       <h1 style="font-size: 24px; font-weight: bold;">BookMark 회원가입 인증 메일</h1>
-      <a href="${PUBLIC_URL}/auth/sign-in?checkCode=${checkCode}?email=${to}">가입 인증</a>
+      <a href="${PUBLIC_URL}/auth/sign-up/${checkCode}?email=${to}">가입 인증</a>
     </div>`;
 
   await sendMail(to, _subject, _html);

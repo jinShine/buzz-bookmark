@@ -1,3 +1,4 @@
+import { INTERNAL_SECRET } from "@/lib/constants";
 import prisma from "@/lib/db";
 import { redirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
@@ -8,31 +9,28 @@ import { sendSignUpCheck } from "../../../../actions/mailer";
 export async function POST(req: NextRequest) {
   const { email, emailcheck, oldEmailCheck } = await req.json();
 
-  if (oldEmailCheck) {
-    const member = await prisma.member.findUnique({
-      where: { email },
-    });
+  console.log("🚀 ~ POST ~ email:", email);
+  console.log("🚀 ~ POST ~ emailcheck:", emailcheck);
+  console.log("🚀 ~ POST ~ oldEmailCheck:", oldEmailCheck);
 
-    if (member?.emailcheck !== oldEmailCheck) {
-      redirect("auth/error?error=InvalidToken");
+  // resend...
+  if (oldEmailCheck) {
+    const mbr = await prisma.member.findUnique({ where: { email } });
+    if (mbr?.emailcheck !== oldEmailCheck) {
+      redirect("/login/error?error=InvalidToken"); // abusing
     }
 
     const newToken = uuidv4();
     await prisma.member.update({
-      where: { email },
       data: { emailcheck: newToken },
+      where: { email },
     });
-
     await sendSignUpCheck(email, newToken);
   } else {
-    const token = req.headers.get("Authorization")?.split(" ")[1];
-
-    if (token !== process.env.INTERNAL_SECRET) {
-      redirect("auth/error?error=InvalidToken");
-    }
-
-    await sendSignUpCheck(email, token || "");
+    const authorization = req.headers.get("authorization");
+    if (authorization !== `Bearer ${INTERNAL_SECRET}`) throw new Error("InvalidToken");
+    await sendSignUpCheck(email, emailcheck);
   }
 
-  return NextResponse.json({ email });
+  return NextResponse.json({ email, message: "Email Resent." });
 }

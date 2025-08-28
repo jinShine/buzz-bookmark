@@ -13,21 +13,23 @@ export default function AuthErrorPage({ searchParams }: Props) {
   const { error, email, emailcheck } = use(searchParams);
 
   return (
-    <div className="flex flex-col items-center justify-center h-[500px] gap-3">
-      <h1 className="text-2xl font-bold">{getErrorMessage(error)}</h1>
-
-      <Link href={"/auth/sign-in"}>
-        <Button variant="secondary">로그인 페이지로 이동</Button>
-      </Link>
-
-      <SendEmailCheck email={email} emailcheck={emailcheck} />
+    <div className="grid place-items-center h-full">
+      <div className="border p-5 text-center rounded-md">
+        <h1 className="text-xl mb-5">{getErrorMessage(error)}</h1>
+        <div className="flex justify-center items-center gap-2">
+          <Button variant={"outline"} asChild={true}>
+            <Link href="/auth/sign-in">Goto Login</Link>
+          </Button>
+          {email && emailcheck && error === "CheckEmail" && <SendEmailCheck email={email} emailcheck={emailcheck} />}
+        </div>
+      </div>
     </div>
   );
 }
 
 const getErrorMessage = (error: string) => {
   if (error === "CheckEmail") {
-    return "이미 가입된 이메일입니다. 이메일을 확인해주세요.";
+    return "가입 승인 메일을 확인해주세요.";
   } else if (error === "NtoMatchPassword") {
     return "이메일 또는 비밀번호가 일치하지 않습니다.";
   } else if (error === "NotFound") {

@@ -1,6 +1,6 @@
-import { use } from "react";
-
+import { Button } from "@/components/ui/button";
 import prisma from "@/lib/db";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { findMemberByEmail } from "../../../../../actions/sign";
@@ -29,7 +29,16 @@ export default async function SignUpCheckPage({ params, searchParams }: Props) {
     data: { emailcheck: null },
   });
 
-  redirect("/auth/sign-in");
-
-  return <div>회원가입</div>;
+  return (
+    <div className="grid place-items-center h-full">
+      <div className="border p-5 text-center rounded-md">
+        <h1 className="text-xl mb-5">가입 승인 완료</h1>
+        <div className="flex justify-center items-center gap-2">
+          <Button variant={"outline"} asChild={true}>
+            <Link href="/auth/sign-in">Goto Login</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }

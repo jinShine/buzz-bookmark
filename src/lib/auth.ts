@@ -1,13 +1,15 @@
 import prisma from "@/lib/db";
 import { compare } from "bcryptjs";
-import NextAuth from "next-auth";
+import NextAuth, { AuthError } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import KakaoProvider from "next-auth/providers/kakao";
 import NaverProvider from "next-auth/providers/naver";
 import { v4 as uuidv4 } from "uuid";
+import z from "zod";
 
+import { findMemberByEmail } from "../../actions/sign";
 import {
   AUTH_GITHUB_ID,
   AUTH_GITHUB_SECRET,
@@ -44,15 +46,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         passwd: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("🚀 credentials:", credentials);
+        console.log("🚀 auth.ts - credentials:", credentials);
         if (!credentials || !credentials.email || !credentials.passwd) return null;
 
         const user = {
-          id: "1",
-          email: credentials.email,
-          name: "User",
+          email: credentials.email as string,
           password: credentials.passwd,
-        } as unknown as any;
+        };
+
+        const validator = z
+          .object({
+            email: z.email(),
+            password: z.string().min(6),
+          })
+          .safeParse(user);
+        if (!validator.success) return null;
+
         return user;
       },
     }),
@@ -71,71 +80,52 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // SNS(signin + signup 같이 진행), credentials(signin만 진행)
     // DB를 읽어서 존재하면 로그인
     // 존재하지 않으면 가입로직(이메일 발송)
-    async signIn({ user, account, profile }) {
-      console.log("🚀 signIn - user:", user, account?.provider, profile);
-      if (!user.email) return false;
+    async signIn({ user, account }) {
+      const { name, email, image, password } = user;
+      if (!email) return false;
 
-      const { email } = user;
-      const isCredentials = account?.provider === "credentials";
+      const isCredential = account?.provider === "credentials";
+      const mbr = await findMemberByEmail(email);
 
-      let member = await prisma.member.findUnique({
-        where: { email },
+      if (mbr) {
+        if (mbr.emailcheck) return `/auth/error?error=CheckEmail&email=${email}&emailcheck=${mbr.emailcheck}`;
+        if (mbr.outdt) return "/auth/error?error=WithdrawMember";
+
+        // password check
+        if (isCredential) {
+          console.log("🚀 ~ mbr.passwd:", mbr.passwd, password, !mbr.passwd);
+          if (!mbr.passwd) {
+            const err = new AuthError(`You registed SNS Account(${email})`);
+            err.type = "OAuthAccountNotLinked";
+            throw err;
+          }
+          // return '/login/error?error=NeedToSnsLogin&email=' + email;
+
+          return compare(password || "", mbr.passwd);
+        }
+
+        return true;
+      }
+
+      // password check
+      if (isCredential) {
+        return "/auth/error?error=NotFound";
+      }
+
+      // regist by SNS
+      const newMbr = await prisma.member.create({
+        select: { id: true, nickname: true },
+        data: {
+          nickname: name || "guest",
+          email,
+          image,
+        },
       });
+      console.log("🚀 ~ newMbr:", newMbr);
 
-      if (member) {
-        if (member.emailcheck === null) {
-          return `/auth/error?error=CheckEmail&email=${email}&emailcheck=${member.emailcheck}`;
-        }
-        if (member.outdt) {
-          return "/auth/error?error=WithdrawMember";
-        }
-      }
+      // sendRegistMail
 
-      if (!member) {
-        const newMember = await prisma.member.create({
-          data: {
-            nickname: user.name || "guest",
-            email,
-            image: user.image ?? null,
-            emailcheck: uuidv4(),
-          },
-        });
-
-        member = newMember;
-      }
-
-      // sendEmail
-      // if (member.)
-
-      // const userData = await findUserByEmail(email);
-      // if (account?.provider === "credentials") {
-      //   const isValidPassword = userData?.passwd && user.password && (await compare(userData.passwd, user.password));
-
-      //   if (!userData || !isValidPassword) return false;
-      //   user.id = String(userData.id);
-      //   user.name = userData.nickname;
-      //   user.image = userData.image ?? undefined;
-      // } else {
-      //   if (!userData) {
-      //     delete user.id;
-      //     const newer = await createUser({
-      //       email: user.email,
-      //       nickname: user.name ?? user.email.split("@")[0],
-      //       image: user.image ?? null,
-      //       isadmin: false,
-      //     });
-      //     console.log("🚀 newer:", newer);
-      //     user.id = String(newer.id);
-      //     user.isadmin = newer.isadmin;
-      //   } else {
-      //     user.id = String(userData?.id);
-      //     user.name = user.name ?? userData?.nickname;
-      //     user.image = user.image ?? userData?.image ?? undefined;
-      //   }
-      // }
-
-      // user.isadmin = userData?.isadmin ?? user.isadmin;
-      return true;
+      return false;
     },
     async jwt({ token, user, trigger, session }) {
       // console.log('🚀 trigger:', trigger, session);
@@ -163,26 +153,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
-
-type CreateUserInput = {
-  email: string;
-  nickname: string;
-  image: string | null;
-  isadmin: boolean;
-};
-
-async function findUserByEmail(email: string) {
-  if (!email) return null;
-  return prisma.member.findUnique({ where: { email } });
-}
-
-async function createUser(input: CreateUserInput) {
-  return prisma.member.create({
-    data: {
-      email: input.email,
-      nickname: input.nickname,
-      image: input.image,
-      isadmin: input.isadmin,
-    },
-  });
-}

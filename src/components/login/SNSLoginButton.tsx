@@ -77,7 +77,7 @@ const PROVIDER_CONFIG: Record<
   },
 };
 
-export default function SNSLoginButton({ provider, label, redirectTo = "/", className, disabled }: Props) {
+export default function SNSLoginButton({ provider, label, redirectTo = "/bookcase", className, disabled }: Props) {
   const [isLoading, setIsLoading] = React.useState(false);
   const cfg = PROVIDER_CONFIG[provider];
 

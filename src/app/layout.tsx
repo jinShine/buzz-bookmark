@@ -34,7 +34,10 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AppProvider>
           <GlobalNav />
-          <main className="h-screen flex-1 border border-violet-500" style={{ height: "calc(100vh - 70px - 60px)" }}>
+          <main
+            className="h-screen flex-1 border border-violet-500 overflow-y-auto"
+            style={{ height: "calc(100vh - 70px - 60px)" }}
+          >
             {children}
           </main>
           <GlobalFooter />
